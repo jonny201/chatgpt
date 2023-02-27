@@ -19,27 +19,7 @@ config = {
     "stop": ".",
     "temperature": 0.1
 }
-config_list = {
-    "解释代码":
-        {
-           "model" : "code-davinci-002",
-          "temperature": 0,
-           "max_tokens" : 64,
-           "top_p" : 1,
-           "frequency_penalty" : 0,
-           "presence_penalty" : 0,
-           "stop" : ["\"\"\""]
-        },
-    "给二年级学生总结":
-        {
-            "model" : "text-davinci-003",
-            "temperature": 0.7,
-            "max_tokens" : 256,
-            "top_p" : 1,
-            "frequency_penalty" : 0,
-            "presence_penalty" : 0
-        }
-}
+
 window = tk.Tk()
 window.geometry("400x800")
 window.title("Chat Window")
@@ -89,10 +69,30 @@ class ChatWindow:
 import tkinter as tk
 from tkinter import ttk
 
+config_list = {
+    "解释代码":
+        {
+           "model" : "code-davinci-002",
+          "temperature": 0,
+           "max_tokens" : 64,
+           "top_p" : 1,
+           "frequency_penalty" : 0,
+           "presence_penalty" : 0,
+           "stop" : ["\"\"\""]
+        },
+    "给二年级学生总结":
+        {
+            "model" : "text-davinci-003",
+            "temperature": 0.7,
+            "max_tokens" : 256,
+            "top_p" : 1,
+            "frequency_penalty" : 0,
+            "presence_penalty" : 0
+        }
+}
 class ConfigDialog:
     def __init__(self, parent):
         self.dialog = parent
-
         self.max_tokens_var = tk.DoubleVar(value=1300)
         self.temperature_var = tk.DoubleVar(value=0.1)
         self.n_var = tk.StringVar(value="1")
@@ -103,6 +103,12 @@ class ConfigDialog:
         self.n_entry = ttk.Entry(self.dialog, textvariable=self.n_var)
         self.stop_entry = ttk.Entry(self.dialog, textvariable=self.stop_var)
 
+        # Create a Combobox to display the options in config_list
+        self.config_options = ttk.Combobox(self.dialog, values=list(config_list.keys()))
+
+        # Bind the selected option to a callback function
+        self.config_options.bind("<<ComboboxSelected>>", self.load_selected_config)
+
         self.max_tokens_slider.grid(row=0, column=1, padx=5, pady=5)
         self.temperature_slider.grid(row=1, column=1, padx=5, pady=5)
         ttk.Label(self.dialog, text="max_tokens:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
@@ -111,6 +117,7 @@ class ConfigDialog:
         ttk.Label(self.dialog, text="stop:").grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
         self.n_entry.grid(row=2, column=1, padx=5, pady=5)
         self.stop_entry.grid(row=3, column=1, padx=5, pady=5)
+        self.config_options.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
 
     def get(self):
         return {
@@ -126,6 +133,11 @@ class ConfigDialog:
         self.n_var.set(config.get("n", "1"))
         self.stop_var.set(config.get("stop", "."))
 
+    def load_selected_config(self, event):
+        # Load the selected config from config_list
+        selected_config_name = self.config_options.get()
+        selected_config = config_list[selected_config_name]
+        self.load(selected_config)
 
 # Example usage:
 

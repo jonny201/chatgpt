@@ -27,10 +27,10 @@ window.title("Chat Window")
 notebook = ttk.Notebook(window)
 # Create the first tab
 tab1 = ttk.Frame(notebook)
-notebook.add(tab1, text='Tab 1')
+notebook.add(tab1, text='对话')
 # Create the second tab
 tab2 = ttk.Frame(notebook)
-notebook.add(tab2, text='Tab 2')
+notebook.add(tab2, text='配置')
 # Pack the notebook and show the window
 notebook.pack(expand=1, fill="both")
 
@@ -90,18 +90,23 @@ config_list = {
             "presence_penalty" : 0
         }
 }
+
 class ConfigDialog:
     def __init__(self, parent):
         self.dialog = parent
+        self.key_var = tk.StringVar(value="")
         self.max_tokens_var = tk.DoubleVar(value=1300)
         self.temperature_var = tk.DoubleVar(value=0.1)
         self.n_var = tk.StringVar(value="1")
         self.stop_var = tk.StringVar(value=".")
+        self.model_var = tk.StringVar(value="")
 
+        self.key_entry = ttk.Entry(self.dialog, textvariable=self.key_var)
         self.max_tokens_slider = ttk.Scale(self.dialog, from_=10, to=2000, variable=self.max_tokens_var, orient="horizontal", length=200)
         self.temperature_slider = ttk.Scale(self.dialog, from_=0, to=1.0, variable=self.temperature_var, orient="horizontal", length=200)
         self.n_entry = ttk.Entry(self.dialog, textvariable=self.n_var)
         self.stop_entry = ttk.Entry(self.dialog, textvariable=self.stop_var)
+        self.model_entry = ttk.Entry(self.dialog, textvariable=self.model_var)
 
         # Create a Combobox to display the options in config_list
         self.config_options = ttk.Combobox(self.dialog, values=list(config_list.keys()))
@@ -109,15 +114,24 @@ class ConfigDialog:
         # Bind the selected option to a callback function
         self.config_options.bind("<<ComboboxSelected>>", self.load_selected_config)
 
-        self.max_tokens_slider.grid(row=0, column=1, padx=5, pady=5)
-        self.temperature_slider.grid(row=1, column=1, padx=5, pady=5)
-        ttk.Label(self.dialog, text="max_tokens:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Label(self.dialog, text="temperature:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Label(self.dialog, text="n:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Label(self.dialog, text="stop:").grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
-        self.n_entry.grid(row=2, column=1, padx=5, pady=5)
-        self.stop_entry.grid(row=3, column=1, padx=5, pady=5)
-        self.config_options.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
+        ttk.Label(self.dialog, text="key:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
+        self.key_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        ttk.Label(self.dialog, text="选择语言模型:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
+        self.config_options.grid(row=1, column=1, columnspan=2, padx=5, pady=5)
+
+        ttk.Label(self.dialog, text="max_tokens:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
+        self.max_tokens_slider.grid(row=2, column=1, padx=5, pady=5)
+        ttk.Label(self.dialog, text="temperature:").grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
+        self.temperature_slider.grid(row=3, column=1, padx=5, pady=5)
+        ttk.Label(self.dialog, text="n:").grid(row=4, column=0, padx=5, pady=5, sticky=tk.W)
+        self.n_entry.grid(row=4, column=1, padx=5, pady=5)
+        ttk.Label(self.dialog, text="stop:").grid(row=5, column=0, padx=5, pady=5, sticky=tk.W)
+        self.stop_entry.grid(row=5, column=1, padx=5, pady=5)
+        ttk.Label(self.dialog, text="model:").grid(row=6, column=0, padx=5, pady=5, sticky=tk.W)
+        self.model_entry.grid(row=6, column=1, padx=5, pady=5)
+
+
 
     def get(self):
         return {
@@ -132,6 +146,7 @@ class ConfigDialog:
         self.temperature_var.set(config.get("temperature", 0.1))
         self.n_var.set(config.get("n", "1"))
         self.stop_var.set(config.get("stop", "."))
+        self.model_var.set(config.get("model", "code-davinci-002"))
 
     def load_selected_config(self, event):
         # Load the selected config from config_list

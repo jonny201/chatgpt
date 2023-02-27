@@ -9,11 +9,13 @@ class TCPClient:
         self.port = port
 
     def send_message(self, message):
+        print("发送数据：",message)
         self.host = socket.gethostbyname(SERVER_NAME)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect((self.host, self.port))
             sock.sendall(message.encode())
             response = sock.recv(1024).decode()
+            print("接收数据：",response)
             return response
 
     def send_json(self,json_data):

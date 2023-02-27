@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <style>
+        /* 样式表 */
+        #chatbox {
+            height: 500px;
+            overflow-y: scroll;
+        }
+        #message {
+            width: 80%;
+            margin-right: 10px;
+        }
+        #send-button {
+            width: 18%;
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbox"></div>
+    <div id="form-container">
+        <input type="text" id="message" placeholder="Type your message here">
+        <button id="send-button">Send</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function() {
+            var socket = new WebSocket('ws://localhost:8080'); // 创建WebSocket连接
+
+            socket.onopen = function() {
+                console.log('WebSocket connection established.');
+            };
+
+            socket.onmessage = function(event) {
+                // 接收服务器发送的消息
+                var message = JSON.parse(event.data).message;
+                $('#chatbox').append($('<div>').text(message));
+                $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+            };
+
+            $('#send-button').click(function() {
+                // 发送消息
+                var message = $('#message').val().trim();
+                if (message) {
+                    socket.send(JSON.stringify({ message: message }));
+                    $('#message').val('');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

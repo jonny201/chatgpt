@@ -12,6 +12,7 @@ class TCPClient:
         print("发送数据：",message)
         self.host = socket.gethostbyname(SERVER_NAME)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            print(self.host, self.port)
             sock.connect((self.host, self.port))
             sock.sendall(message.encode())
             response = sock.recv(1024).decode()

@@ -10,7 +10,8 @@ data = {
     "stop": ".",
     "temperature": 0.1,
 },
-"key":"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"
+"key":"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",
+"continue": "yes"
 }
 
 config = {
@@ -54,6 +55,7 @@ class ChatWindow:
     def send_message(self, event=None):
         message = self.input_entry.get("1.0", "end-1c")
         if message:
+            get_param()
             self.chat_history.config(state=tk.NORMAL)
             self.chat_history.insert(tk.END, f"You: {message}\n")
             self.chat_history.see(tk.END)
@@ -70,6 +72,16 @@ import tkinter as tk
 from tkinter import ttk
 
 config_list = {
+    "默认":
+        {
+            "model": "code-davinci-002",
+            "temperature": 0,
+            "max_tokens": 64,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "stop": ["\"\"\""]
+        },
     "解释代码":
         {
            "model" : "code-davinci-002",
@@ -131,15 +143,26 @@ class ConfigDialog:
         ttk.Label(self.dialog, text="model:").grid(row=6, column=0, padx=5, pady=5, sticky=tk.W)
         self.model_entry.grid(row=6, column=1, padx=5, pady=5)
 
-
+        self.load(config_list["默认"])
+        self.config_options.current(0)
 
     def get(self):
-        return {
-            "max_tokens": int(self.max_tokens_var.get()),
-            "n": int(self.n_var.get()),
-            "stop": self.stop_var.get(),
-            "temperature": self.temperature_var.get()
+        ret_data=  {
+              "param":{
+                "model": self.model_var.get(),
+                "max_tokens": int(self.max_tokens_var.get()),
+                "n": int(self.n_var.get()),
+                "stop": self.stop_var.get(),
+                "temperature": self.temperature_var.get()
+            },
         }
+
+        key_str = self.key_var.get()
+        if "sk-"in key_str:
+            ret_data["key"] = key_str
+        print(ret_data)
+
+        return ret_data
 
     def load(self, config):
         self.max_tokens_var.set(config.get("max_tokens", 1300))
@@ -155,7 +178,11 @@ class ConfigDialog:
         self.load(selected_config)
 
 # Example usage:
-
 chat_window = ChatWindow(tab1)
 config_dialog= ConfigDialog(tab2)
+
+def get_param():
+    global data
+    data = config_dialog.get()
+
 window.mainloop()

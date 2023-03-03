@@ -113,7 +113,7 @@ class ConfigDialog:
         self.stop_var = tk.StringVar(value=".")
         self.model_var = tk.StringVar(value="")
 
-        self.key_entry = ttk.Entry(self.dialog, textvariable=self.key_var)
+        self.key_entry = ttk.Entry(self.dialog, width=40,textvariable=self.key_var)
         self.max_tokens_slider = ttk.Scale(self.dialog, from_=10, to=2000, variable=self.max_tokens_var, orient="horizontal", length=200)
         self.temperature_slider = ttk.Scale(self.dialog, from_=0, to=1.0, variable=self.temperature_var, orient="horizontal", length=200)
         self.n_entry = ttk.Entry(self.dialog, textvariable=self.n_var)
@@ -126,8 +126,8 @@ class ConfigDialog:
         # Bind the selected option to a callback function
         self.config_options.bind("<<ComboboxSelected>>", self.load_selected_config)
 
-        ttk.Label(self.dialog, text="key:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-        self.key_entry.grid(row=0, column=1, padx=5, pady=5)
+        ttk.Label(self.dialog, text="key:").grid(row=0, column=0, padx=5, pady=3, sticky=tk.W)
+        self.key_entry.grid(row=0, column=1, padx=5, pady=3)
 
         ttk.Label(self.dialog, text="选择语言模型:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
         self.config_options.grid(row=1, column=1, columnspan=2, padx=5, pady=5)

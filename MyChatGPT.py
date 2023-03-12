@@ -1,8 +1,8 @@
 key = "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"
 key_list = {
-    "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": "free",
-    "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": "free",
-    "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": "free"
+    "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": "free",
+    "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": "free",
+    "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": "free"
 }
 demo_ret_data = {'id': 'cmpl-6smEjmNkLnQOdEJZfRcgwCakey03M', 'object': 'text_completion', 'created': 1678513153, 'model': 'text-davinci-003', 'choices': [{'text': '\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n#include <sys/socket.h>\n#include <netinet/in.h>\n#include <arpa/inet.h>\n\n#define MAXLINE 1024\n\nint main(int argc, char *argv[])\n{\n    int sockfd, n;\n    char recvline[MAXLINE + 1];\n    struct sockaddr_in servaddr;\n\n    if (argc != 2)\n    {\n        printf("usage: a.out <IPaddress>\\n");\n        exit(1);\n    }\n\n    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)\n    {\n        printf("socket error\\n");\n        exit(1);\n    }\n\n    bzero(&servaddr, sizeof(servaddr));\n    servaddr.sin_family = AF_INET;\n    servaddr.sin_port = htons(80);\n    if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)\n    {\n        printf("inet_pton error for %s\\n", argv[1]);\n        exit(1);\n    }\n\n    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)\n    {\n        printf("connect error\\n");\n        exit(1);\n    }\n\n    char *request = "GET / HTTP/1.1\\r\\nHost: www.example.com\\r\\n\\r\\n";\n    write(sockfd, request, strlen(request));\n\n    while ((n = read(sockfd, recvline, MAXLINE)) > 0)\n    {\n        recvline[n] = 0;\n        if (fputs(recvline, stdout) == EOF)\n        {\n            printf("fputs error\\n");\n            exit(1);\n        }\n    }\n    if (n < 0)\n    {\n        printf("read error\\n");\n        exit(1);\n    }\n\n    exit(0);\n}', 'index': 0, 'logprobs': None, 'finish_reason': 'stop'}], 'usage': {'prompt_tokens': 13, 'completion_tokens': 523, 'total_tokens': 536}}
 
@@ -16,7 +16,7 @@ class Gpt():
 
     def __init__(self):
         self.prompt = "你今年多大？"
-        self.openai_api_key = list(key_list.keys())[1]
+        self.openai_api_key = list(key_list.keys())[0]
         #self.openai_engine = "davinci-codex"
         self.openai_engine = "text-davinci-003"
         self.url = "https://api.openai.com/v1/engines/"+self.openai_engine+"/completions"
@@ -61,8 +61,10 @@ class Gpt():
             "prompt": self.prompt,
             "max_tokens": 3000,
             "n": 1,
-         #   "stop": "。",
+            "stop": ["\nyou:","\ngpt:"],
             "temperature": 0.1,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.6,
         }
         print( self.data)
         response = requests.post(self.url, headers=self.headers, data=json.dumps(self.data), proxies=proxies)

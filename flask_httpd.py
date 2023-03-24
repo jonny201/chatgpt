@@ -37,12 +37,12 @@ def cgi_script():
     if message == None:
         return "网络出错"
     message = message[0]
-    print("接收到的信息-->",message)
+    print("接收到的信息-->", message)
 
     session_id = params.get('session_id', None)
     if session_id != None:
         session_id = session_id[0]
-    print("接收到的会话id-->",session_id)
+    print("接收到的会话id-->", session_id)
 
     try:
         chatgpt = MyChatGPT.Gpt()
@@ -50,13 +50,13 @@ def cgi_script():
         print("创建gpt 错误")
         return "系统出错"
 
-    all_msg= user_session.get_session(session_id)
+    all_msg = user_session.add_session(session_id, message, "you")
     try:
-        output = chatgpt.get_session(all_msg+ "you:" + message)
+        output = chatgpt.get_session(all_msg)
     except:
         print("gpt 回复错误")
         return "gpt回复错误"
-    user_session.add_session(session_id,message,output)
+    user_session.add_session(session_id, output, "gpt")
     return output
 
 

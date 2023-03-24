@@ -1,25 +1,25 @@
-key = "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"
 key_list = {
-    "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": "free",
-    "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": "free",
-    "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": "free"
+    "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": "free",
+    "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": "free",
+    "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": "free"
 }
-demo_ret_data = {'id': 'cmpl-6smEjmNkLnQOdEJZfRcgwCakey03M', 'object': 'text_completion', 'created': 1678513153, 'model': 'text-davinci-003', 'choices': [{'text': '\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n#include <sys/socket.h>\n#include <netinet/in.h>\n#include <arpa/inet.h>\n\n#define MAXLINE 1024\n\nint main(int argc, char *argv[])\n{\n    int sockfd, n;\n    char recvline[MAXLINE + 1];\n    struct sockaddr_in servaddr;\n\n    if (argc != 2)\n    {\n        printf("usage: a.out <IPaddress>\\n");\n        exit(1);\n    }\n\n    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)\n    {\n        printf("socket error\\n");\n        exit(1);\n    }\n\n    bzero(&servaddr, sizeof(servaddr));\n    servaddr.sin_family = AF_INET;\n    servaddr.sin_port = htons(80);\n    if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)\n    {\n        printf("inet_pton error for %s\\n", argv[1]);\n        exit(1);\n    }\n\n    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)\n    {\n        printf("connect error\\n");\n        exit(1);\n    }\n\n    char *request = "GET / HTTP/1.1\\r\\nHost: www.example.com\\r\\n\\r\\n";\n    write(sockfd, request, strlen(request));\n\n    while ((n = read(sockfd, recvline, MAXLINE)) > 0)\n    {\n        recvline[n] = 0;\n        if (fputs(recvline, stdout) == EOF)\n        {\n            printf("fputs error\\n");\n            exit(1);\n        }\n    }\n    if (n < 0)\n    {\n        printf("read error\\n");\n        exit(1);\n    }\n\n    exit(0);\n}', 'index': 0, 'logprobs': None, 'finish_reason': 'stop'}], 'usage': {'prompt_tokens': 13, 'completion_tokens': 523, 'total_tokens': 536}}
 
-key_list_index =0
+key_list_index = 0
 key_list_max = len(key_list)
-proxies = { 'http': 'http://127.0.0.1:40880','https': 'http://127.0.0.1:40880'}
+proxies = {'http': 'http://127.0.0.1:40880', 'https': 'http://127.0.0.1:40880'}
 import requests
 import json
 import time
+
+
 class Gpt():
 
     def __init__(self):
         self.prompt = "你今年多大？"
-        self.openai_api_key = list(key_list.keys())[0]
-        #self.openai_engine = "davinci-codex"
+        self.openai_api_key = list(key_list.keys())[2]
+        # self.openai_engine = "davinci-codex"
         self.openai_engine = "text-davinci-003"
-        self.url = "https://api.openai.com/v1/engines/"+self.openai_engine+"/completions"
+        self.url = "https://api.openai.com/v1/engines/" + self.openai_engine + "/completions"
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.openai_api_key}"
@@ -31,6 +31,7 @@ class Gpt():
             "stop": ".",
             "temperature": 0.1,
         }
+
     def get_free_key(self):
         global key_list
         global key_list_index
@@ -38,9 +39,9 @@ class Gpt():
 
         for i in range(5):
             for cnt in range(key_list_max):
-                key_list_index+=1
+                key_list_index += 1
                 index = key_list_index % key_list_max
-                key =list(key_list.keys())[index]
+                key = list(key_list.keys())[index]
                 status = key_list[key]
                 if status == "free":
                     key_list[key] = "used"
@@ -49,42 +50,57 @@ class Gpt():
         print("获取key超时")
         return None
 
-    def free(self,key):
+    def free(self, key):
         global key_list
         key_list[key] = "free"
 
-    def get_session(self, text = ""):
+    def get_session(self, text=""):
         if text != "":
             self.prompt = text
 
-        self.data = {
+        data = {
             "prompt": self.prompt,
             "max_tokens": 3000,
             "n": 1,
-            "stop": ["\nyou:","\ngpt:"],
+            "stop": ["\nyou:", "\ngpt:"],
             "temperature": 0.1,
             "frequency_penalty": 0.0,
             "presence_penalty": 0.6,
         }
-        print( self.data)
-        response = requests.post(self.url, headers=self.headers, data=json.dumps(self.data), proxies=proxies)
-        print(response)
-        if response.status_code == 200:
-            result = response.json()
-            print(result)
-            return result['choices'][0]['text']
-        else:
-            return "链接错误"
+        return self.get_session_with_param(data)
 
     def get_session_with_param(self, param):
-        print("chatgpt in:",param)
+        print("chatgpt in:", param)
         if param == "":
-            return "参数错误"
+            return "参数错误", False
+
+        prompt = param.get("prompt")
+        if prompt == None:
+            return "参数错误", False
+
+        self.data = {
+            "prompt": prompt,
+            "max_tokens": param.get("max_tokens", 3000),
+            "n": param.get("max_tokens", 1),
+            "temperature": param.get("temperature", 0.1),
+        }
+        stop = param.get("stop")
+        if stop != None:
+            self.data["stop"] = stop
+
+        frequency_penalty = param.get("frequency_penalty")
+        if frequency_penalty != None:
+            self.data["frequency_penalty"] = frequency_penalty
+
+        presence_penalty = param.get("presence_penalty")
+        if presence_penalty != None:
+            self.data["presence_penalty"] = presence_penalty
+
         for cnt in range(5):
             self.openai_api_key = self.get_free_key()
-            print("key:",self.openai_api_key)
+            print("key:", self.openai_api_key)
             if self.openai_api_key == None:
-                return "连接数量过多，获取不到key"
+                return "连接数量过多，获取不到key", False
 
             self.headers = {
                 "Content-Type": "application/json",
@@ -97,16 +113,17 @@ class Gpt():
 
             if response.status_code == 200:
                 result = response.json()
-                ret_data =result['choices'][0]['text']
-                print("chatgpt out:",ret_data)
-                return ret_data
+                ret_data = result['choices'][0]['text']
+                print("chatgpt out:", ret_data)
+                return ret_data, True
             else:
-                print(cnt,response)
+                print(cnt, response)
 
-        return "链接错误"
+        return "链接错误", False
+
 
 if __name__ == '__main__':
     chatgpt = Gpt()
     t = "你今年多少岁？"
-    ret=chatgpt.get_session(t)
+    ret = chatgpt.get_session(t)
     print(ret)
